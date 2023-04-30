@@ -1,5 +1,5 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import { ConfigService, ConfigType } from '@nestjs/config';
 import { MongoClient } from 'mongodb';
 
 import config from '../config';
@@ -11,11 +11,23 @@ const API_KEY_PROD = 'PROD1212121SA';
 @Global()
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://mondodb-exhio.wxo8gfl.mongodb.net', {
-      user: 'christianadmin',
-      pass: 'chA4vBV0qoYri5T2',
-      dbName: 'platzi-store',
-    }),
+    // MongooseModule.forRoot('mongodb+srv://mondodb-exhio.wxo8gfl.mongodb.net', {
+    //   user: 'christianadmin',
+    //   pass: 'chA4vBV0qoYri5T2',
+    //   dbName: 'platzi-store',
+    // }),
+    MongooseModule.forRootAsync({
+      useFactory: (ConfigService: ConfigType<typeof config>) => {
+        const {connection,user,password,host,port,dbName} = ConfigService.mongo;
+        return {
+          uri: `${connection}://${host}`,
+          user,
+          pass: password,
+          dbName
+        }
+      },
+      inject: [config.KEY]
+    })
   ],
   providers: [
     {
